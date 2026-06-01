@@ -1,11 +1,14 @@
 package com.jm.Avaliacoes_de_Livros.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,6 +32,10 @@ public class Livros {
     private String capa;
 
     private String sinopse;
+
+    @OneToMany(mappedBy = "livro")
+    @JsonManagedReference
+    private List<Comentarios> comentarios;
 
     @CreationTimestamp
     @Column(name = "created_at")
