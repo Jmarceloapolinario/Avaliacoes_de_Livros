@@ -22,8 +22,10 @@ public class LivrosService {
     public List<Livros> listar(){
         return repository.findAll();
     }
-    public Optional<Livros> listarId(Long id){
-        return repository.findById(id);
+    public Livros findById(Long id){
+        return repository.findById(id)  // retorna Optional<Livros>
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+        // 👆 desempacota o Optional, ou lança exceção se vazio
     }
 
 
