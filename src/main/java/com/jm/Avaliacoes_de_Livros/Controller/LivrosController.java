@@ -3,7 +3,9 @@ package com.jm.Avaliacoes_de_Livros.Controller;
 import com.jm.Avaliacoes_de_Livros.Controller.Request.LivrosRequest;
 import com.jm.Avaliacoes_de_Livros.Controller.Response.LivrosResponse;
 import com.jm.Avaliacoes_de_Livros.Mapper.LivrosMapper;
+import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
+import com.jm.Avaliacoes_de_Livros.Service.ComentariosService;
 import com.jm.Avaliacoes_de_Livros.Service.LivrosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,6 +29,7 @@ public class LivrosController {
     private static String caminhoCapa = "D:\\imgLivro/";
 
     private final LivrosService service;
+    private final ComentariosService comentariosService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LivrosResponse> save(
@@ -55,17 +59,18 @@ public class LivrosController {
         return ResponseEntity.ok(LivrosMapper.toLivrosResponse(savedLivro));
     }
     @GetMapping("/listar")
-    public ResponseEntity<List<LivrosResponse>> listar(){
+    public ResponseEntity<List<LivrosResponse>> listar() {
         List<LivrosResponse> lista = service.listar()
                 .stream()
                 .map(LivrosMapper::toLivrosResponse)
                 .toList();
         return ResponseEntity.ok(lista);
     }
+
+
     @GetMapping("/listar/{id}")
-    public ResponseEntity<LivrosResponse> listarId(@PathVariable Long id){
-        return service.listarId(id)
-                .map(livros -> ResponseEntity.ok(LivrosMapper.toLivrosResponse(livros)))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<LivrosResponse> findById(@PathVariable Long id){
+        Livros livro = service.findById(id);
+        return ResponseEntity.ok(LivrosMapper.toLivrosResponse(livro));
     }
 }
