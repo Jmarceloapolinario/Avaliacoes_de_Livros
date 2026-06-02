@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("livros/livro")
@@ -72,5 +73,42 @@ public class LivrosController {
     public ResponseEntity<LivrosResponse> findById(@PathVariable Long id){
         Livros livro = service.findById(id);
         return ResponseEntity.ok(LivrosMapper.toLivrosResponse(livro));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LivrosResponse> alterarLivro(@PathVariable Long id, @RequestPart("dados") LivrosRequest request, @RequestPart("file") MultipartFile arquivo){
+        try {
+            if (!arquivo.isEmpty()){
+                byte[] bytes = arquivo.getBytes();
+                Path caminho = Paths.get(caminhoCapa+String.valueOf(request.titulo())+arquivo.getOriginalFilename());
+                Files.write(caminho, bytes);
+
+                request = new LivrosRequest(
+                        request.titulo(),
+                        request.autor(),
+                        caminho.toString(),
+                        request.sinopse(),
+                        request.createdAt(),
+                        request.updateAt()
+
+                );
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return service.alterar(id, LivrosMapper.toLivro(request))
+                .map(livros -> ResponseEntity.ok(LivrosMapper.toLivrosResponse(livros)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delte(@PathVariable Long id){
+       Livros livro = service.findById(id);
+       if (livro != null){
+            service.delete(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+       }
+       return ResponseEntity.notFound().build();
+
     }
 }

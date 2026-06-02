@@ -32,7 +32,9 @@ public class LivrosMapper {
 
     public static LivrosResponse toLivrosResponse(Livros livros){
 
-        List<ComentariosResponse> comentariosResponses = livros.getComentarios().stream()
+        List<ComentariosResponse> comentariosResponses = livros.getComentarios() == null
+                ? List.of()  // 👈 retorna lista vazia se for null
+                : livros.getComentarios().stream()
                 .map(ComentariosMapper::toComentarioResponse)
                 .toList();
 
