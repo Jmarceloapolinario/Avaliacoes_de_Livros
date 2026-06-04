@@ -24,4 +24,23 @@ public class ComentariosService {
     public Optional<Comentarios> listarId(Long id){
         return repository.findById(id);
     }
+    public Optional<Comentarios> alterarComentario(Long id, Comentarios alterarComentario){
+        Optional<Comentarios> optionalComentarios = repository.findById(id);
+        if (optionalComentarios.isPresent()){
+
+            Comentarios comentario = optionalComentarios.get();
+            comentario.setComentario(alterarComentario.getComentario());
+            comentario.setEstrelas(alterarComentario.getEstrelas());
+
+            repository.save(comentario);
+
+            return Optional.of(comentario);
+
+        }
+        return Optional.empty();
+    }
+
+    public void deletar(Long id){
+        repository.deleteById(id);
+    }
 }
