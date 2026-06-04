@@ -7,7 +7,9 @@ import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
 import com.jm.Avaliacoes_de_Livros.Service.ComentariosService;
 import com.jm.Avaliacoes_de_Livros.Service.LivrosService;
+import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +28,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("livros/livro")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "\"http://localhost:8081\"")
 public class LivrosController {
 
     private static String caminhoCapa = "D:\\imgLivro/";
@@ -32,7 +36,40 @@ public class LivrosController {
     private final LivrosService service;
     private final ComentariosService comentariosService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping("/{id}/imagem")
+    public ResponseEntity<Resource> buscarImagem(@PathVariable Long id) {
+        try {
+            // 1. Busque o livro no seu repositório/serviço para pegar o caminho salvo
+            Livros livro = service.findById(id); // Adapte para o seu serviço
+            String caminhoDaImagem = livro.getCapa(); // Pega o caminho (ex: "D:/imagens/capa.jpg")
+
+            if (caminhoDaImagem == null || caminhoDaImagem.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 2. Transforma o caminho de texto em um recurso legível do sistema
+            Path path = Paths.get(caminhoDaImagem);
+            Resource resource = new UrlResource(path.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                // 3. Descobre o tipo de arquivo (PNG ou JPEG) para o navegador entender
+                String contentType = caminhoDaImagem.toLowerCase().endsWith(".png")
+                        ? MediaType.IMAGE_PNG_VALUE
+                        : MediaType.IMAGE_JPEG_VALUE;
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+
+        } catch (MalformedURLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    @PostMapping(value = {"", "/"},consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LivrosResponse> save(
             @RequestPart("dados") LivrosRequest livrosRequest,
             @RequestPart("file") MultipartFile arquivo){
