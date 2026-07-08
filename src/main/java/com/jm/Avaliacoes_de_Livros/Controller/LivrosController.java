@@ -7,6 +7,11 @@ import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
 import com.jm.Avaliacoes_de_Livros.Service.ComentariosService;
 import com.jm.Avaliacoes_de_Livros.Service.LivrosService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
@@ -29,30 +34,34 @@ import java.util.Optional;
 @RequestMapping("livros/livro")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "\"http://localhost:8081\"")
+@Tag(name = "Livros" , description = "Recurso responsavel por gerenciar os livros")
 public class LivrosController {
 
     private static String caminhoCapa = "D:\\imgLivro/";
 
     private final LivrosService service;
-    private final ComentariosService comentariosService;
 
+
+
+    @Operation(summary = "Buscar a imagem especifica do livro" , description = "Buscar a imagem vinculada a um livro e retorna para o frontend.")
+    @ApiResponse(responseCode = "200" , description = "A imagem")
     @GetMapping("/{id}/imagem")
     public ResponseEntity<Resource> buscarImagem(@PathVariable Long id) {
         try {
-            // 1. Busque o livro no seu repositório/serviço para pegar o caminho salvo
-            Livros livro = service.findById(id); // Adapte para o seu serviço
-            String caminhoDaImagem = livro.getCapa(); // Pega o caminho (ex: "D:/imagens/capa.jpg")
+
+            Livros livro = service.findById(id);
+            String caminhoDaImagem = livro.getCapa();
 
             if (caminhoDaImagem == null || caminhoDaImagem.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            // 2. Transforma o caminho de texto em um recurso legível do sistema
+
             Path path = Paths.get(caminhoDaImagem);
             Resource resource = new UrlResource(path.toUri());
 
             if (resource.exists() && resource.isReadable()) {
-                // 3. Descobre o tipo de arquivo (PNG ou JPEG) para o navegador entender
+
                 String contentType = caminhoDaImagem.toLowerCase().endsWith(".png")
                         ? MediaType.IMAGE_PNG_VALUE
                         : MediaType.IMAGE_JPEG_VALUE;
@@ -68,8 +77,11 @@ public class LivrosController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    
-    @PostMapping(value = {"", "/"},consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @Operation(summary = "Cria um novo livro" , description = "Metodo responsavel por criar um novo livro.")
+    @ApiResponse(responseCode = "201" , description = "Livro adicionado com sucesso",
+    content = @Content(schema = @Schema(implementation = LivrosRequest.class)))
+    @PostMapping(value = {"/"},consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LivrosResponse> save(
             @RequestPart("dados") LivrosRequest livrosRequest,
             @RequestPart("file") MultipartFile arquivo){
@@ -94,8 +106,11 @@ public class LivrosController {
         }
 
         Livros savedLivro = service.save(LivrosMapper.toLivro(livrosRequest));
-        return ResponseEntity.ok(LivrosMapper.toLivrosResponse(savedLivro));
+        return ResponseEntity.status(HttpStatus.CREATED).body(LivrosMapper.toLivrosResponse(savedLivro));
     }
+    @Operation(summary = "Lista todos os livros" , description = "Metodo responsavel por listar todos os livros.")
+    @ApiResponse(responseCode = "200" , description = "Lista de livros",
+    content = @Content(schema = @Schema(implementation = LivrosResponse.class)))
     @GetMapping("/listar")
     public ResponseEntity<List<LivrosResponse>> listar() {
         List<LivrosResponse> lista = service.listar()
@@ -106,12 +121,18 @@ public class LivrosController {
     }
 
 
+    @Operation(summary = "Lista um livro especifico" , description = "Metodo responsavel por lista um livro por ID.")
+    @ApiResponse(responseCode = "200", description = "Livro",
+    content = @Content(schema = @Schema(implementation = LivrosResponse.class)))
     @GetMapping("/listar/{id}")
     public ResponseEntity<LivrosResponse> findById(@PathVariable Long id){
         Livros livro = service.findById(id);
         return ResponseEntity.ok(LivrosMapper.toLivrosResponse(livro));
     }
 
+    @Operation(summary = "Altera um livro", description = "Metodo responsavel para alterar um livro selecionado por um ID.")
+    @ApiResponse(responseCode = "200", description = "Livro alterado com sucesso",
+    content = @Content(schema = @Schema(implementation = LivrosRequest.class)))
     @PutMapping("/{id}")
     public ResponseEntity<LivrosResponse> alterarLivro(@PathVariable Long id, @RequestPart("dados") LivrosRequest request, @RequestPart("file") MultipartFile arquivo){
         try {
@@ -138,6 +159,8 @@ public class LivrosController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Deleta um livro", description = "Deleta o livro selecionado por um ID.")
+    @ApiResponse(responseCode = "204" , description = "Livro deletado com sucesso")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delte(@PathVariable Long id){
        Livros livro = service.findById(id);
