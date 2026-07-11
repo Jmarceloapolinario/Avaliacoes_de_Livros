@@ -2,216 +2,198 @@
 
 <p align="center">
 
-![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge\&logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-6DB33F?style=for-the-badge\&logo=springboot)
-![MySQL](https://img.shields.io/badge/MySQL-8+-4479A1?style=for-the-badge\&logo=mysql\&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge\&logo=apachemaven)
-![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge\&logo=swagger)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=for-the-badge&logo=springboot)
+![MySQL](https://img.shields.io/badge/MySQL-8+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200?style=for-the-badge&logo=flyway&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge&logo=swagger)
 
 </p>
 
-API REST desenvolvida utilizando **Java** e **Spring Boot** para gerenciamento de livros e avaliações.
+API REST desenvolvida com **Java 21** e **Spring Boot 4** para gerenciamento de livros e comentários/avaliações.
 
-A aplicação permite cadastrar livros, realizar upload da capa, gerenciar comentários e disponibiliza documentação completa da API através do **Swagger/OpenAPI**.
-
-O projeto foi desenvolvido seguindo boas práticas de organização em camadas (**Controller → Service → Repository**), utilizando DTOs, Mappers e tratamento global de exceções para tornar a API mais organizada, escalável e de fácil manutenção.
+Permite cadastrar livros com upload de capa, gerenciar comentários vinculados a cada livro, e conta com documentação interativa via **Swagger/OpenAPI**. O schema do banco é versionado com **Flyway**, e o projeto segue a arquitetura em camadas (Controller → Service → Repository), com DTOs, Mappers e tratamento centralizado de exceções.
 
 ---
 
-# ✨ Funcionalidades
+## ✨ Funcionalidades
 
-## 📖 Livros
+### 📖 Livros
+- Cadastro de livro com upload de capa (`multipart/form-data`)
+- Listagem completa e busca por ID
+- Atualização de livro (incluindo nova capa)
+- Remoção de livro
+- Download/consulta da imagem da capa
 
-* Cadastro de livros
-* Consulta de livros
-* Listagem completa
-* Atualização de informações
-* Remoção de livros
-* Upload da imagem da capa
+### 💬 Comentários
+- Cadastro de comentário vinculado a um livro (com nota em estrelas)
+- Atualização de comentário
+- Remoção de comentário
 
-## 💬 Comentários
-
-* Cadastro de comentários
-* Consulta de comentários
-* Associação entre comentários e livros
-
-## ⚙️ API
-
-* Validação de dados
-* Tratamento global de exceções
-* Respostas padronizadas
-* Documentação automática com Swagger
-* Arquitetura em camadas
+### ⚙️ Infraestrutura da API
+- Validação de arquivo de capa (aceita apenas `.png`, `.jpg`, `.jpeg`)
+- Nomes de arquivo gerados via UUID (sem uso de dado do usuário no path — evita path traversal)
+- Tratamento global de exceções via `@RestControllerAdvice`
+- Migrations de banco versionadas com Flyway
+- Documentação automática com Swagger
 
 ---
 
-# 🛠 Tecnologias Utilizadas
+## 🛠 Tecnologias Utilizadas
 
-| Tecnologia      | Descrição                     |
-| --------------- | ----------------------------- |
-| Java 21         | Linguagem principal           |
-| Spring Boot     | Framework principal           |
-| Spring Web      | Desenvolvimento da API REST   |
-| Spring Data JPA | Persistência dos dados        |
-| MySQL           | Banco de dados relacional     |
-| Maven           | Gerenciamento de dependências |
-| Lombok          | Redução de código boilerplate |
-| Swagger/OpenAPI | Documentação da API           |
+| Tecnologia       | Descrição                              |
+| ---------------- | --------------------------------------- |
+| Java 21          | Linguagem principal                     |
+| Spring Boot 4    | Framework principal                     |
+| Spring Web MVC   | Construção da API REST                  |
+| Spring Data JPA  | Persistência de dados                   |
+| Flyway           | Versionamento e migração do schema      |
+| MySQL 8+         | Banco de dados relacional               |
+| Maven            | Gerenciamento de dependências e build   |
+| Lombok           | Redução de boilerplate                  |
+| Swagger/OpenAPI  | Documentação interativa da API          |
 
 ---
 
-# 📂 Estrutura do Projeto
+## 📂 Estrutura do Projeto
 
 ```text
 src
-└── main
-    ├── java
-    │   └── com
-    │       └── jm
-    │           └── Avaliacoes_de_Livros
-    │               ├── Config
-    │               ├── Controller
-    │               │   ├── Request
-    │               │   └── Response
-    │               ├── Exceptions
-    │               ├── Mapper
-    │               ├── Model
-    │               ├── Repository
-    │               ├── Service
-    │               └── AvaliacoesDeLivrosApplication.java
-    │
-    └── resources
-        └── application.properties
+├── main
+│   ├── java
+│   │   └── com/jm/Avaliacoes_de_Livros
+│   │       ├── Config          # Segurança, CORS, tratamento global de exceções
+│   │       ├── Controller      # Endpoints REST
+│   │       │   ├── Request     # DTOs de entrada
+│   │       │   └── Response    # DTOs de saída
+│   │       ├── Exceptions      # Exceções de negócio customizadas
+│   │       ├── Mapper          # Conversão entidade ↔ DTO
+│   │       ├── Model           # Entidades JPA
+│   │       ├── Repository      # Interfaces Spring Data JPA
+│   │       ├── Service         # Regras de negócio
+│   │       └── AvaliacoesDeLivrosApplication.java
+│   └── resources
+│       ├── application.properties
+│       └── db/migration        # Migrations Flyway (V1, V2, ...)
+└── test
+    └── java/com/jm/Avaliacoes_de_Livros
 ```
 
 ---
 
-# 🏛 Arquitetura
-
-A aplicação foi estruturada seguindo a arquitetura em camadas.
+## 🏛 Arquitetura
 
 ```text
 Cliente
    │
    ▼
-Controller
+Controller  →  valida entrada, orquestra upload de arquivo
    │
    ▼
-Service
+Service     →  regra de negócio
    │
    ▼
-Repository
+Repository  →  Spring Data JPA
    │
    ▼
-MySQL
+MySQL       →  schema gerenciado pelo Flyway
 ```
-
-Cada camada possui uma responsabilidade específica, facilitando manutenção, testes e evolução da aplicação.
 
 ---
 
-# ⚙️ Como Executar
+## ⚙️ Como Executar
 
-## 1. Clone o repositório
+### 1. Pré-requisitos
+- Java 21+
+- Maven (ou use o `mvnw`/`mvnw.cmd` incluído)
+- MySQL 8+ rodando localmente
+
+### 2. Clone o repositório
 
 ```bash
 git clone https://github.com/Jmarceloapolinario/Avaliacoes_de_Livros.git
-```
-
----
-
-## 2. Entre na pasta
-
-```bash
 cd Avaliacoes_de_Livros
 ```
 
----
+### 3. Configure o banco de dados
 
-## 3. Configure o banco de dados
-
-Crie um banco MySQL.
-
-Configure o arquivo:
+Edite `src/main/resources/application.properties` com suas credenciais:
 
 ```properties
-src/main/resources/application.properties
-```
-
-Exemplo:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/avaliacoes_de_livros
+spring.datasource.url=jdbc:mysql://localhost:3306/avaliacoes_de_livros?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=America/Fortaleza
 spring.datasource.username=root
 spring.datasource.password=sua_senha
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
 ```
 
----
+> O banco é criado automaticamente na primeira execução (`createDatabaseIfNotExist=true`), e o **Flyway** cria as tabelas rodando as migrations em `src/main/resources/db/migration`. Não é necessário criar tabelas manualmente.
 
-## 4. Execute a aplicação
+### 4. Configure o diretório de upload das capas (opcional)
 
-Windows
+Por padrão, as capas são salvas em `./uploads/capas/`, relativo à pasta onde a aplicação roda — a pasta é criada automaticamente se não existir. Para usar outro caminho:
 
+```properties
+app.upload.dir=/caminho/que/voce/quiser/
+```
+
+### 5. Execute a aplicação
+
+Windows:
 ```bash
 mvnw.cmd spring-boot:run
 ```
 
-Linux / macOS
-
+Linux / macOS:
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Ou execute diretamente pela sua IDE favorita.
+Ou execute `AvaliacoesDeLivrosApplication` diretamente pela sua IDE.
 
 ---
 
-# 📑 Documentação da API
+## 📑 Documentação da API
 
-Após iniciar a aplicação, acesse:
+Com a aplicação rodando, acesse:
 
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
 
-Toda a documentação dos endpoints poderá ser consultada diretamente pelo navegador.
+---
+
+## 📚 Endpoints
+
+### Livros — base `/livros`
+
+| Método | Endpoint              | Descrição                                  |
+| ------ | ---------------------- | ------------------------------------------- |
+| POST   | `/livros/`              | Cadastra um livro (`multipart/form-data`)   |
+| GET    | `/livros/`              | Lista todos os livros                       |
+| GET    | `/livros/{id}`          | Busca um livro por ID                       |
+| GET    | `/livros/{id}/imagem`   | Retorna a imagem da capa do livro           |
+| PUT    | `/livros/{id}`          | Atualiza um livro (`multipart/form-data`)   |
+| DELETE | `/livros/{id}`          | Remove um livro                             |
+
+O corpo `multipart/form-data` do POST/PUT espera duas partes:
+- `dados`: JSON com os campos do livro
+- `file`: arquivo de imagem da capa (`.png`, `.jpg` ou `.jpeg`)
+
+### Comentários — base `/livros/comentarios`
+
+| Método | Endpoint                   | Descrição                        |
+| ------ | ---------------------------- | ---------------------------------- |
+| POST   | `/livros/comentarios/`       | Cadastra um comentário             |
+| PUT    | `/livros/comentarios/{id}`   | Atualiza um comentário             |
+| DELETE | `/livros/comentarios/{id}`   | Remove um comentário               |
 
 ---
 
-# 📚 Endpoints
+## 📥 Exemplos de Requisição
 
-## Livros
+### Cadastro de livro
 
-| Método | Endpoint       | Descrição             |
-| ------ | -------------- | --------------------- |
-| POST   | `/livros`      | Cadastra um livro     |
-| GET    | `/livros`      | Lista todos os livros |
-| GET    | `/livros/{id}` | Busca um livro por ID |
-| PUT    | `/livros/{id}` | Atualiza um livro     |
-| DELETE | `/livros/{id}` | Remove um livro       |
-
----
-
-## Comentários
-
-| Método | Endpoint            | Descrição               |
-| ------ | ------------------- | ----------------------- |
-| POST   | `/comentarios`      | Cadastra um comentário  |
-| GET    | `/comentarios`      | Lista comentários       |
-| GET    | `/comentarios/{id}` | Busca comentário por ID |
-
-> Os endpoints podem variar conforme a implementação dos controllers.
-
----
-
-# 📥 Exemplo de Requisição
-
-## Cadastro de Livro
-
+Parte `dados` (JSON):
 ```json
 {
   "titulo": "Clean Code",
@@ -219,57 +201,73 @@ Toda a documentação dos endpoints poderá ser consultada diretamente pelo nave
   "sinopse": "Boas práticas para desenvolvimento de software."
 }
 ```
+Parte `file`: arquivo de imagem (`.png`/`.jpg`/`.jpeg`)
+
+### Cadastro de comentário
+
+```json
+{
+  "comentario": "Livro excelente, mudou minha forma de programar.",
+  "estrelas": 5,
+  "livroId": 1
+}
+```
 
 ---
 
-# 📤 Exemplo de Resposta
+## 📤 Exemplo de Resposta — Livro
 
 ```json
 {
   "id": 1,
   "titulo": "Clean Code",
   "autor": "Robert C. Martin",
-  "sinopse": "Boas práticas para desenvolvimento de software."
+  "capa": "uploads/capas/3f2a1b9c-....jpg",
+  "sinopse": "Boas práticas para desenvolvimento de software.",
+  "comentarios": [],
+  "createdAt": "2026-07-11T10:00:00",
+  "updateAt": "2026-07-11T10:00:00"
 }
 ```
 
 ---
 
-# ⚠️ Tratamento de Exceções
+## ⚠️ Tratamento de Exceções
 
-A aplicação possui tratamento centralizado utilizando `@ControllerAdvice`, retornando respostas padronizadas para erros da API.
+Tratamento centralizado via `@RestControllerAdvice`, retornando `400 Bad Request` com mensagem descritiva para:
 
-Alguns exemplos de exceções tratadas:
-
-* Livro não encontrado
-* Livro vazio
-* Comentário vazio
-* Arquivo inválido
-* Erros de validação
-* Erros internos do servidor
+- Livro não encontrado
+- Livro vazio (sem arquivo de capa)
+- Comentário vazio
+- Arquivo de capa inválido (extensão não suportada ou falha ao salvar)
 
 ---
 
-# 📖 Padrões Utilizados
+## 🔓 Sobre segurança
 
-Durante o desenvolvimento foram utilizados diversos conceitos importantes do ecossistema Spring:
-
-* DTOs para entrada e saída de dados
-* Mappers para conversão entre entidades e DTOs
-* Injeção de Dependências
-* Repository Pattern
-* Service Layer Pattern
-* Tratamento Global de Exceções
-* Validação com Bean Validation
-* Separação de responsabilidades
+Este projeto foi pensado para consumo por um front-end confiável em ambiente de desenvolvimento — por isso, atualmente **todos os endpoints estão liberados sem autenticação** (`permitAll`), com CORS restrito à origem configurada em `app.frontend.url`. Não há verificação de identidade/autorização implementada. Se for evoluir este projeto para produção, adicionar autenticação (JWT, OAuth2, etc.) é o próximo passo recomendado.
 
 ---
 
-# 👨‍💻 Autor
+## 📖 Padrões e Práticas Utilizadas
+
+- DTOs (`record`) para entrada e saída de dados
+- Mappers dedicados para conversão entidade ↔ DTO
+- Injeção de Dependências via construtor
+- Repository Pattern (Spring Data JPA)
+- Service Layer Pattern
+- Tratamento Global de Exceções
+- Migrations versionadas com Flyway
+- Upload de arquivo com nome gerado (UUID), sem uso de dado do usuário no path
+- Separação de responsabilidades por camada
+
+---
+
+## 👨‍💻 Autor
 
 ### Marcelo Alencar
 
-Estudante de Sistemas de Informação 
+Estudante de Sistemas de Informação
 
-* GitHub: https://github.com/Jmarceloapolinario
-* LinkedIn: https://www.linkedin.com/in/marcelo-alencar-b7a072267/
+- GitHub: https://github.com/Jmarceloapolinario
+- LinkedIn: https://www.linkedin.com/in/marcelo-alencar-b7a072267/
