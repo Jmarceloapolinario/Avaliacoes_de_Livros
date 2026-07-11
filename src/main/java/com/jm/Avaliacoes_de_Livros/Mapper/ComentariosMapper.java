@@ -30,7 +30,8 @@ public class ComentariosMapper {
                 .id(comentarios.getId())
                 .comentario(comentarios.getComentario())
                 .estrelas(comentarios.getEstrelas())
-
+                .createdAt(comentarios.getCreatedAt())
+                .updateat(comentarios.getUpdateAt())
                 .build();
 
     }

@@ -46,6 +46,8 @@ public class LivrosMapper {
                 .capa(livros.getCapa())
                 .sinopse(livros.getSinopse())
                 .comentarios(comentariosResponses)
+                .createdAt(livros.getCreatedAt())
+                .updateAt(livros.getUpdateAt())
                 .build();
     }
 

@@ -165,7 +165,8 @@ public class LivrosController {
     @Operation(summary = "Deleta um livro", description = "Deleta o livro selecionado por um ID.")
     @ApiResponse(responseCode = "204" , description = "Livro deletado com sucesso")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<String> delete(@PathVariable Long id){
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

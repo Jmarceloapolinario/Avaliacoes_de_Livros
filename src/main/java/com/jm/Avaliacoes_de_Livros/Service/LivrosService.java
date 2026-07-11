@@ -49,14 +49,12 @@ public class LivrosService {
             throw new LivroNotPresent("Esse livro nao existe");
     }
 
-    public String delete(Long id){
+    public void delete(Long id){
         Optional<Livros> livro = repository.findById(id);
         if (livro.isEmpty()){
-            throw new LivroNotPresent("Esse lirvro nao existe");
+            throw new LivroNotPresent("Esse livro nao existe");
         }
-
         repository.deleteById(id);
-        return "Livro deletado com sucesso";
     }
 
 
