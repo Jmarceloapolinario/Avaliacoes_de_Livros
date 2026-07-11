@@ -5,9 +5,7 @@ import com.jm.Avaliacoes_de_Livros.Controller.Response.LivrosResponse;
 import com.jm.Avaliacoes_de_Livros.Exceptions.ArquivoInvalido;
 import com.jm.Avaliacoes_de_Livros.Exceptions.LivroEmpty;
 import com.jm.Avaliacoes_de_Livros.Mapper.LivrosMapper;
-import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
-import com.jm.Avaliacoes_de_Livros.Service.ComentariosService;
 import com.jm.Avaliacoes_de_Livros.Service.LivrosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +20,16 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("livros/livro")
@@ -104,13 +97,17 @@ public class LivrosController {
 
         try {
             String nomeOriginal = arquivo.getOriginalFilename();
+            if (nomeOriginal == null || !nomeOriginal.contains(".")){
+                throw new ArquivoInvalido("Esse tipo de arquivo é invalido");
+            }
             String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
 
             if (!ExtesoesPermitidas.contains(extensao)){
                 throw new ArquivoInvalido("Esse tipo de arquivo é invalido");
             }
                 byte[] bytes = arquivo.getBytes();
-                Path caminho = Paths.get(caminhoCapa+String.valueOf(livrosRequest.titulo())+arquivo.getOriginalFilename());
+                String nomeSeguro = UUID.randomUUID() + extensao;
+                Path caminho = Paths.get(caminhoCapa+ nomeSeguro);
                 Files.write(caminho, bytes);
 
                 livrosRequest = new LivrosRequest(
@@ -124,7 +121,7 @@ public class LivrosController {
                 );
 
         } catch (IOException e) {
-            e.printStackTrace();
+           throw new ArquivoInvalido("Nao foi possivel salvar a imagem da capa.", e);
         }
 
         Livros savedLivro = service.save(LivrosMapper.toLivro(livrosRequest));
@@ -161,6 +158,9 @@ public class LivrosController {
            throw new LivroEmpty("O Livro esta vazio");
        }
         String nomeOriginal = arquivo.getOriginalFilename();
+        if (nomeOriginal == null || !nomeOriginal.contains(".")){
+            throw new ArquivoInvalido("Esse tipo de arquivo é invalido");
+        }
         String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
 
         if (!ExtesoesPermitidas.contains(extensao)){
@@ -168,7 +168,8 @@ public class LivrosController {
         }
        try{
            byte[] bytes = arquivo.getBytes();
-           Path caminho = Paths.get(caminhoCapa,request.titulo() + arquivo.getOriginalFilename());
+           String nomeSeguro = UUID.randomUUID() + extensao;
+           Path caminho = Paths.get(caminhoCapa + nomeSeguro);
            Files.write(caminho,bytes);
 
            request = new LivrosRequest(
@@ -180,7 +181,7 @@ public class LivrosController {
                    request.updateAt()
            );
        }catch (IOException e){
-           e.printStackTrace();
+           throw new ArquivoInvalido("Nao foi possivel salvar a imagem da capa.", e);
        }
         return service.alterar(id, LivrosMapper.toLivro(request))
                 .map(livros -> ResponseEntity.ok(LivrosMapper.toLivrosResponse(livros)))
