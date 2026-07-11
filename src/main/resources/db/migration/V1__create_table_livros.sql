@@ -4,7 +4,7 @@ CREATE TABLE livros(
         autor VARCHAR(255),
         capa VARCHAR(255),
         sinopse VARCHAR(255),
-        created_at timestamp,
-        update_at timestamp
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
 );

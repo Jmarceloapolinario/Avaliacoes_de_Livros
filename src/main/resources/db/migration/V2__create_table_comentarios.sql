@@ -1,0 +1,9 @@
+CREATE TABLE comentarios(
+    id SERIAL PRIMARY KEY,
+    comentario VARCHAR(255),
+    estrelas DOUBLE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    livro_id BIGINT UNSIGNED NOT NULL,  -- 👈 chave estrangeira
+    FOREIGN KEY (livro_id) REFERENCES livros(id)
+)
