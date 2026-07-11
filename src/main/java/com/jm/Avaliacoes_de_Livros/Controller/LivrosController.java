@@ -2,6 +2,7 @@ package com.jm.Avaliacoes_de_Livros.Controller;
 
 import com.jm.Avaliacoes_de_Livros.Controller.Request.LivrosRequest;
 import com.jm.Avaliacoes_de_Livros.Controller.Response.LivrosResponse;
+import com.jm.Avaliacoes_de_Livros.Exceptions.LivroEmpty;
 import com.jm.Avaliacoes_de_Livros.Mapper.LivrosMapper;
 import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
@@ -18,6 +19,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -82,11 +84,12 @@ public class LivrosController {
     @ApiResponse(responseCode = "201" , description = "Livro adicionado com sucesso",
     content = @Content(schema = @Schema(implementation = LivrosRequest.class)))
     @PostMapping(value = {"/"},consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<LivrosResponse> save(
-            @RequestPart("dados") LivrosRequest livrosRequest,
-            @RequestPart("file") MultipartFile arquivo){
+    public ResponseEntity<LivrosResponse> save(@RequestPart("dados") LivrosRequest livrosRequest, @RequestPart("file") MultipartFile arquivo){
+        if (arquivo.isEmpty()){
+            throw new LivroEmpty("O livro esta vazio");
+        }
+
         try {
-            if (!arquivo.isEmpty()){
                 byte[] bytes = arquivo.getBytes();
                 Path caminho = Paths.get(caminhoCapa+String.valueOf(livrosRequest.titulo())+arquivo.getOriginalFilename());
                 Files.write(caminho, bytes);
@@ -100,7 +103,7 @@ public class LivrosController {
                         livrosRequest.updateAt()
 
                 );
-            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,25 +138,25 @@ public class LivrosController {
     content = @Content(schema = @Schema(implementation = LivrosRequest.class)))
     @PutMapping("/{id}")
     public ResponseEntity<LivrosResponse> alterarLivro(@PathVariable Long id, @RequestPart("dados") LivrosRequest request, @RequestPart("file") MultipartFile arquivo){
-        try {
-            if (!arquivo.isEmpty()){
-                byte[] bytes = arquivo.getBytes();
-                Path caminho = Paths.get(caminhoCapa+String.valueOf(request.titulo())+arquivo.getOriginalFilename());
-                Files.write(caminho, bytes);
+       if(arquivo.isEmpty()){
+           throw new LivroEmpty("O Livro esta vazio");
+       }
+       try{
+           byte[] bytes = arquivo.getBytes();
+           Path caminho = Paths.get(caminhoCapa,request.titulo() + arquivo.getOriginalFilename());
+           Files.write(caminho,bytes);
 
-                request = new LivrosRequest(
-                        request.titulo(),
-                        request.autor(),
-                        caminho.toString(),
-                        request.sinopse(),
-                        request.createdAt(),
-                        request.updateAt()
-
-                );
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+           request = new LivrosRequest(
+                   request.titulo(),
+                   request.autor(),
+                   request.toString(),
+                   request.sinopse(),
+                   request.createdAt(),
+                   request.updateAt()
+           );
+       }catch (IOException e){
+           e.printStackTrace();
+       }
         return service.alterar(id, LivrosMapper.toLivro(request))
                 .map(livros -> ResponseEntity.ok(LivrosMapper.toLivrosResponse(livros)))
                 .orElse(ResponseEntity.notFound().build());
@@ -162,13 +165,7 @@ public class LivrosController {
     @Operation(summary = "Deleta um livro", description = "Deleta o livro selecionado por um ID.")
     @ApiResponse(responseCode = "204" , description = "Livro deletado com sucesso")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delte(@PathVariable Long id){
-       Livros livro = service.findById(id);
-       if (livro != null){
-            service.delete(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-       }
-       return ResponseEntity.notFound().build();
-
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        return ResponseEntity.notFound().build();
     }
 }

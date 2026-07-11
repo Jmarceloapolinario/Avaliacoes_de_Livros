@@ -1,6 +1,7 @@
 package com.jm.Avaliacoes_de_Livros.Service;
 
 
+import com.jm.Avaliacoes_de_Livros.Exceptions.LivroNotPresent;
 import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
 import com.jm.Avaliacoes_de_Livros.Model.Livros;
 import com.jm.Avaliacoes_de_Livros.Repository.LivrosRepository;
@@ -26,9 +27,9 @@ public class LivrosService {
         return repository.findAll();
     }
     public Livros findById(Long id){
-        return repository.findById(id)  // retorna Optional<Livros>
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
-        // 👆 desempacota o Optional, ou lança exceção se vazio
+        return repository.findById(id)
+                .orElseThrow(() -> new LivroNotPresent("Livro não encontrado"));
+
     }
     public Optional<Livros> alterar(Long id , Livros alterarLivro){
             Optional<Livros> optLivro = repository.findById(id);
@@ -45,11 +46,17 @@ public class LivrosService {
 
                 return Optional.of(livro);
             }
-            return Optional.empty();
+            throw new LivroNotPresent("Esse livro nao existe");
     }
 
-    public void delete(Long id){
+    public String delete(Long id){
+        Optional<Livros> livro = repository.findById(id);
+        if (livro.isEmpty()){
+            throw new LivroNotPresent("Esse lirvro nao existe");
+        }
+
         repository.deleteById(id);
+        return "Livro deletado com sucesso";
     }
 
 
