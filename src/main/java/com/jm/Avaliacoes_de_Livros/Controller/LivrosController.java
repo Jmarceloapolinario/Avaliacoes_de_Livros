@@ -2,6 +2,7 @@ package com.jm.Avaliacoes_de_Livros.Controller;
 
 import com.jm.Avaliacoes_de_Livros.Controller.Request.LivrosRequest;
 import com.jm.Avaliacoes_de_Livros.Controller.Response.LivrosResponse;
+import com.jm.Avaliacoes_de_Livros.Exceptions.ArquivoInvalido;
 import com.jm.Avaliacoes_de_Livros.Exceptions.LivroEmpty;
 import com.jm.Avaliacoes_de_Livros.Mapper.LivrosMapper;
 import com.jm.Avaliacoes_de_Livros.Model.Comentarios;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.UrlResource;
@@ -23,6 +27,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -31,19 +36,27 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("livros/livro")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "\"http://localhost:8081\"")
+@CrossOrigin(origins = "${app.frontend.url}")
 @Tag(name = "Livros" , description = "Recurso responsavel por gerenciar os livros")
 public class LivrosController {
 
-    private static String caminhoCapa = "D:\\imgLivro/";
+    @Value("${app.upload.dir}")
+    private String caminhoCapa;
 
     private final LivrosService service;
 
+    private static final Set<String> ExtesoesPermitidas = Set.of(".png", ".jpg", ".jpeg");
 
+    @Operation(summary = "Cria o diretorio caso ele nao exista")
+    @PostConstruct
+    public void garantirDiretorioDeUpload() throws IOException {
+        Files.createDirectories(Paths.get(caminhoCapa));
+    }
 
     @Operation(summary = "Buscar a imagem especifica do livro" , description = "Buscar a imagem vinculada a um livro e retorna para o frontend.")
     @ApiResponse(responseCode = "200" , description = "A imagem")
@@ -90,6 +103,12 @@ public class LivrosController {
         }
 
         try {
+            String nomeOriginal = arquivo.getOriginalFilename();
+            String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
+
+            if (!ExtesoesPermitidas.contains(extensao)){
+                throw new ArquivoInvalido("Esse tipo de arquivo é invalido");
+            }
                 byte[] bytes = arquivo.getBytes();
                 Path caminho = Paths.get(caminhoCapa+String.valueOf(livrosRequest.titulo())+arquivo.getOriginalFilename());
                 Files.write(caminho, bytes);
@@ -149,7 +168,7 @@ public class LivrosController {
            request = new LivrosRequest(
                    request.titulo(),
                    request.autor(),
-                   request.toString(),
+                   caminho.toString(),
                    request.sinopse(),
                    request.createdAt(),
                    request.updateAt()

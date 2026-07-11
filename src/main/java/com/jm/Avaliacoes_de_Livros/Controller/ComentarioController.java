@@ -29,7 +29,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("livros/comentarios")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "\"http://localhost:8081\"")
+@CrossOrigin(origins = "${app.frontend.url}")
 @Tag(name = "Comentarios", description = "Recurso responsavel por gerenciar os comentarios")
 public class ComentarioController {
 

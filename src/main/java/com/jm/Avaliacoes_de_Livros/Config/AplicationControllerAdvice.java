@@ -1,5 +1,6 @@
 package com.jm.Avaliacoes_de_Livros.Config;
 
+import com.jm.Avaliacoes_de_Livros.Exceptions.ArquivoInvalido;
 import com.jm.Avaliacoes_de_Livros.Exceptions.ComentarioEmpty;
 import com.jm.Avaliacoes_de_Livros.Exceptions.LivroEmpty;
 import com.jm.Avaliacoes_de_Livros.Exceptions.LivroNotPresent;
@@ -25,6 +26,11 @@ public class AplicationControllerAdvice {
     @ExceptionHandler(ComentarioEmpty.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handerComentarioEmpty(ComentarioEmpty ex){
+        return ex.getMessage();
+    }
+    @ExceptionHandler(ArquivoInvalido.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handerArquivoInvalido(ArquivoInvalido ex){
         return ex.getMessage();
     }
 }
