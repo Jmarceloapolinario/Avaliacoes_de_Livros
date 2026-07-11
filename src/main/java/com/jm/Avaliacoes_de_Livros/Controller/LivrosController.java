@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("livros/livro")
+@RequestMapping("livros/")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "${app.frontend.url}")
 @Tag(name = "Livros" , description = "Recurso responsavel por gerenciar os livros")
@@ -130,7 +130,7 @@ public class LivrosController {
     @Operation(summary = "Lista todos os livros" , description = "Metodo responsavel por listar todos os livros.")
     @ApiResponse(responseCode = "200" , description = "Lista de livros",
     content = @Content(schema = @Schema(implementation = LivrosResponse.class)))
-    @GetMapping("/listar")
+    @GetMapping("/")
     public ResponseEntity<List<LivrosResponse>> listar() {
         List<LivrosResponse> lista = service.listar()
                 .stream()
@@ -143,7 +143,7 @@ public class LivrosController {
     @Operation(summary = "Lista um livro especifico" , description = "Metodo responsavel por lista um livro por ID.")
     @ApiResponse(responseCode = "200", description = "Livro",
     content = @Content(schema = @Schema(implementation = LivrosResponse.class)))
-    @GetMapping("/listar/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<LivrosResponse> findById(@PathVariable Long id){
         Livros livro = service.findById(id);
         return ResponseEntity.ok(LivrosMapper.toLivrosResponse(livro));
