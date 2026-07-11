@@ -160,6 +160,12 @@ public class LivrosController {
        if(arquivo.isEmpty()){
            throw new LivroEmpty("O Livro esta vazio");
        }
+        String nomeOriginal = arquivo.getOriginalFilename();
+        String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
+
+        if (!ExtesoesPermitidas.contains(extensao)){
+            throw new ArquivoInvalido("Esse tipo de arquivo é invalido");
+        }
        try{
            byte[] bytes = arquivo.getBytes();
            Path caminho = Paths.get(caminhoCapa,request.titulo() + arquivo.getOriginalFilename());
