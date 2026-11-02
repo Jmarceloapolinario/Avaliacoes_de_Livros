@@ -284,7 +284,7 @@ Durante o desenvolvimento foram utilizados diversos conceitos importantes do eco
 
 # 👨‍💻 Autor
 
-### Marcelo Alencar
+### José Marcelo 
 
 Estudante de Sistemas de Informação no IFCE Campus Crato · Técnico em Informática pela EEEP Presidente Médici
 
